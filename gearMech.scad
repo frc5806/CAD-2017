@@ -153,7 +153,7 @@ module breadSheet(split) {
     }
 }
 
-module onionsHaveLayers(layers) {    
+module onionsHaveLayers(layers=18) {    
     translate([6.125,6.125]) for (i=[0:layers/2]) {
         translate([0.4*i,0.4*i]) butterSheet();
     }
@@ -163,7 +163,19 @@ module onionsHaveLayers(layers) {
     }
 }
 
-onionsHaveLayers(18);
-//breadSheet(split=false);
-//butterSheet();
-//igusBolts();
+module cuttingTable(split=false) {
+    if (!split) {
+        translate([6,6]) breadSheet(split=split);
+        translate([6,15]) breadSheet(split=split);
+    } else {
+        translate([-2,5]) rotate(-45) { 
+            translate([6,6]) breadSheet(split=true);
+            translate([1,6.75]) rotate(180) breadSheet(split=true);
+        }         translate([-2,13.65]) rotate(-45) { 
+            translate([6,6]) breadSheet(split=true);
+            translate([1,7.5]) rotate(180) breadSheet(split=true);
+        }
+    }
+}
+
+cuttingTable(true);
