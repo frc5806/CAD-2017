@@ -23,6 +23,11 @@ hood_angle = 90;
 flywheel_rad = 5;
 flywheel_thickness=0.5;
 
+hex_bearing_or = 1.125/2;
+
+cim_length = 4.34;
+cim_rad = 1.25;
+
 module hood() {
 	color([.3,0.3,.3]) union() {
 	    translate([0,-hood_width/2,hood_or]) rotate([-90])
@@ -40,11 +45,7 @@ module hood() {
 	}
 }
 
-module divider(rad) {
-	hex_bearing_or = 1.125/2;
-
-	color([.75,.65,0.56]) translate([0,0,hood_ir]) rotate([90,90,0]) translate([0,0,-divider_width/2])
-	linear_extrude(height=divider_width)
+module divider_2d() {
 	difference() {
 		union() {
 			union() {
@@ -64,12 +65,13 @@ module divider(rad) {
 		circle(hex_bearing_or, $fn=res);
 	}
 }
+module divider() {
+	color([.75,.65,0.56]) translate([0,0,hood_ir]) rotate([90,90,0]) translate([0,0,-divider_width/2])
+	linear_extrude(height=divider_width) divider_2d();
+}
 
-module cim_mount_divider(rad) {
-	hex_bearing_or = 1.125/2;
-
-	color([.75,.65,0.56]) translate([0,0,hood_ir]) rotate([90,90,0]) translate([0,0,-cim_divider_width/2])
-	linear_extrude(height=cim_divider_width) difference() {
+module cim_mount_divider_2d() {
+	difference() {
 		union() {
 			union() {
 				intersection() {
@@ -88,6 +90,10 @@ module cim_mount_divider(rad) {
 		circle(hex_bearing_or, $fn=res);
 		for(i=[1:4]) rotate([0,0,90*i]) translate([1,0]) circle(0.1, $fn=res);
 	}
+}
+module cim_mount_divider() {
+	color([.75,.65,0.56]) translate([0,0,hood_ir]) rotate([90,90,0]) translate([0,0,-cim_divider_width/2])
+	linear_extrude(height=cim_divider_width) cim_mount_divider_2d();
 }
 
 module wheel() {
@@ -108,8 +114,6 @@ module flywheel() {
 	}
 }
 
-cim_length = 4.34;
-cim_rad = 1.25;
 module cim_motor() {
 	color([0.15,0.15,0.15]) rotate([90,0]) cylinder(cim_length, cim_rad, cim_rad, center=true, $fn=res);
 }
@@ -118,6 +122,16 @@ module axle() {
 	color([0.3,0.3,0.3]) rotate([90,0]) cylinder(hood_width, .5/sqrt(3), .5/sqrt(3), center=true, $fn=6);
 }
 
+// This one is not parametric for fairly obvious reasons :(
+// It does not fit on a single sheet, so I have it divided into two sheets to better use material.
+module layout_dividers_2d() {
+	translate([add_trans+.1, add_trans+.1]) mirror([-1,1]) divider_2d();
+	translate([hood_or+.8, hood_or+1.2]) rotate([0,0,-60]) divider_2d();
+}
+module layout_cim_mount_dividers_2d() {
+	translate([add_trans+.1, add_trans+.1]) mirror([-1,1]) cim_mount_divider_2d();
+	translate([hood_or+.8, hood_or+1.2]) rotate([0,0,-60]) cim_mount_divider_2d();
+}
 module shooter() {
 
 	hood();
@@ -138,4 +152,14 @@ module shooter() {
     translate([0,0,hood_or]) axle();
 }
 
-shooter();
+// 1 = 2d dividers, 2 = 2d cim dividers, 3 = 3d
+rndr = 3;
+if(rndr == 1) {
+	layout_dividers_2d();
+}
+else if(rndr == 2) {
+	layout_cim_mount_dividers_2d();
+}
+else if(rndr == 3) {
+	shooter();
+}
