@@ -10,9 +10,10 @@ hood_or = hood_ir + hood_thickness;
 
 ball_channel_gap = 0.125;
 divider_width = 0.25;
+cim_divider_width = 0.25;
 
 flywheel_region_width = 1.75;
-hood_width = 2 * (ball_diameter + ball_channel_gap) + 4 * divider_width + flywheel_region_width;
+hood_width = 2*(ball_diameter+ball_channel_gap) + 2*divider_width + 2*cim_divider_width + flywheel_region_width;
 
 add_trans = 1.5;
 hood_length = hood_or + add_trans; //Ensures covers all.
@@ -23,7 +24,7 @@ flywheel_rad = 5;
 flywheel_thickness=0.5;
 
 module hood() {
-	union() {
+	color([.3,0.3,.3]) union() {
 	    translate([0,-hood_width/2,hood_or]) rotate([-90])
 	    linear_extrude(height = hood_width) intersection() {
 	        difference() {
@@ -42,8 +43,9 @@ module hood() {
 module divider(rad) {
 	hex_bearing_or = 1.125/2;
 
-	translate([0,0,hood_ir]) rotate([90,90,0]) translate([0,0,-divider_width/2])
-	linear_extrude(height=divider_width) difference() {
+	color([.75,.65,0.56]) translate([0,0,hood_ir]) rotate([90,90,0]) translate([0,0,-divider_width/2])
+	linear_extrude(height=divider_width)
+	difference() {
 		union() {
 			union() {
 				intersection() {
@@ -63,15 +65,40 @@ module divider(rad) {
 	}
 }
 
+module cim_mount_divider(rad) {
+	hex_bearing_or = 1.125/2;
+
+	color([.75,.65,0.56]) translate([0,0,hood_ir]) rotate([90,90,0]) translate([0,0,-cim_divider_width/2])
+	linear_extrude(height=cim_divider_width) difference() {
+		union() {
+			union() {
+				intersection() {
+					circle(hood_ir, $fn=res);
+					square([hood_ir, hood_ir]);
+					rotate([0,0,hood_angle-90]) square([hood_ir, hood_ir]);
+				}
+				theta = acos(add_trans/hood_ir);
+				polygon([[0,0],[cos(hood_angle)*hood_ir,sin(hood_angle)*hood_ir],[-add_trans*sin(theta), add_trans*cos(theta)]]);
+			}
+			translate([0,hood_or-hood_length]) square([hood_ir, add_trans]);
+			intersection() {
+				circle(add_trans, $fn=res);
+			}
+		}
+		circle(hex_bearing_or, $fn=res);
+		for(i=[1:4]) rotate([0,0,90*i]) translate([1,0]) circle(0.1, $fn=res);
+	}
+}
+
 module wheel() {
-	rotate([90,0]) translate([0,0,-0.5]) linear_extrude(height=1) difference() {
+	color([0,0,.6]) rotate([90,0]) translate([0,0,-0.5]) linear_extrude(height=1) difference() {
 		circle(wheel_or, $fn=res);
 		circle(0.5/sqrt(3), $fn=6);
 	}
 }
 
 module flywheel() {
-	rotate([90]) difference() {
+	color([0.6,0.6,.6]) rotate([90]) difference() {
 		union() {
 			cylinder(0.5, 5, 5, center=true, $fn=res);
 			cylinder(flywheel_thickness+0.43, 1.125, 1.125, center=true, $fn=res);
@@ -84,24 +111,24 @@ module flywheel() {
 cim_length = 4.34;
 cim_rad = 1.25;
 module cim_motor() {
-	rotate([90,0]) cylinder(cim_length, cim_rad, cim_rad, center=true, $fn=res);
+	color([0.15,0.15,0.15]) rotate([90,0]) cylinder(cim_length, cim_rad, cim_rad, center=true, $fn=res);
 }
 
 module axle() {
-	rotate([90,0]) cylinder(hood_width, .5/sqrt(3), .5/sqrt(3), center=true, $fn=6);
+	color([0.3,0.3,0.3]) rotate([90,0]) cylinder(hood_width, .5/sqrt(3), .5/sqrt(3), center=true, $fn=6);
 }
 
 module shooter() {
 
 	hood();
 
-	translate([0,divider_width+(ball_diameter+ball_channel_gap+flywheel_region_width)/2,hood_ir]) wheel();
-	translate([0,-divider_width-(ball_diameter+ball_channel_gap+flywheel_region_width)/2,hood_ir]) wheel();
+	translate([0,divider_width+(ball_diameter+ball_channel_gap+flywheel_region_width)/2,hood_or]) wheel();
+	translate([0,-divider_width-(ball_diameter+ball_channel_gap+flywheel_region_width)/2,hood_or]) wheel();
 
-	translate([0,(flywheel_region_width+divider_width)/2]) divider();
-	translate([0,-(flywheel_region_width+divider_width)/2]) divider();
-	translate([0,(hood_width-divider_width)/2]) divider();
-	translate([0,-(hood_width-divider_width)/2]) divider();
+	translate([0,(flywheel_region_width+divider_width)/2,hood_thickness]) divider();
+	translate([0,-(flywheel_region_width+divider_width)/2,hood_thickness]) divider();
+	translate([0,(hood_width-cim_divider_width)/2,hood_thickness]) cim_mount_divider();
+	translate([0,-(hood_width-cim_divider_width)/2,hood_thickness]) cim_mount_divider();
 
 	translate([0,0,hood_or]) flywheel();
 
