@@ -9,7 +9,7 @@ hood_thickness = 0.0625; // Assuming steel for now
 hood_or = hood_ir + hood_thickness;
 
 ball_channel_gap = 0.125;
-divider_width = 0.125;
+divider_width = 0.25;
 
 flywheel_region_width = 1.75;
 hood_width = 2 * (ball_diameter + ball_channel_gap) + 4 * divider_width + flywheel_region_width;
@@ -17,7 +17,7 @@ hood_width = 2 * (ball_diameter + ball_channel_gap) + 4 * divider_width + flywhe
 add_trans = 1.5;
 hood_length = hood_or + add_trans; //Ensures covers all.
 
-hood_angle = 82;
+hood_angle = 90;
 
 flywheel_rad = 5;
 flywheel_thickness=0.5;
@@ -81,10 +81,14 @@ module flywheel() {
 	}
 }
 
-//flywheel();
+cim_length = 4.34;
+cim_rad = 1.25;
+module cim_motor() {
+	rotate([90,0]) cylinder(cim_length, cim_rad, cim_rad, center=true, $fn=res);
+}
 
-module hex_axle(diameter, length) {
-    cylinder(length, diameter/sqrt(3), diameter/sqrt(3), $fn=6);
+module axle() {
+	rotate([90,0]) cylinder(hood_width, .5/sqrt(3), .5/sqrt(3), center=true, $fn=6);
 }
 
 module shooter() {
@@ -100,7 +104,11 @@ module shooter() {
 	translate([0,-(hood_width-divider_width)/2]) divider();
 
 	translate([0,0,hood_or]) flywheel();
+
+	translate([0,(hood_width+cim_length+.062)/2,hood_or]) cim_motor(); // flange thickness = .062
+	translate([0,-(hood_width+cim_length+.062)/2,hood_or]) cim_motor(); // flange thickness = .062
     
+    translate([0,0,hood_or]) axle();
 }
 
 shooter();
