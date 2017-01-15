@@ -170,7 +170,7 @@ module cuttingTable(split=false) {
     }
 }
 
-module renderSystem() {
+module renderSystem(split=false) {
     length=24;
 
     translate([0,0,1.75+height]) rotate([-90,0,0]) {
@@ -178,14 +178,23 @@ module renderSystem() {
         translate([-0.5 - length,0,0]) mirror([1,0,0]) endCap();
         color([0.5,0.5,0.5]) translate([-0.25,0,0.75+carriageHeight]) rotate([270,0,90]) igus(length);
         
-        translate([-length/2,-2.5,0.5]) rotate(180) linear_extrude(0.25) breadSheet();
-        translate([-length/2,-2.5,-1.75]) rotate(180) linear_extrude(2.25) butterSheet();
-        translate([-length/2,-2.5,-1.75]) rotate(180) linear_extrude(2.25) mirror([1,0]) butterSheet();
-        translate([-length/2,-2.5,-2]) rotate(180) linear_extrude(0.25) breadSheet();
+        if (split) {
+            translate([1-length/2,-2.5,0.5]) rotate(180) linear_extrude(0.25) breadSheet(split=true);
+            translate([-1-length/2,-2.5,0.5]) rotate(180) linear_extrude(0.25) mirror([1,0]) breadSheet(split=true);
+            translate([1-length/2,-2.5,-1.75]) rotate(180) linear_extrude(2.25) butterSheet();
+            translate([-1-length/2,-2.5,-1.75]) rotate(180) linear_extrude(2.25) mirror([1,0]) butterSheet();
+            translate([1-length/2,-2.5,-2]) rotate(180) linear_extrude(0.25) breadSheet(split=true);
+            translate([-1-length/2,-2.5,-2]) rotate(180) linear_extrude(0.25) mirror([1,0]) breadSheet(split=true);
+        } else {
+            translate([-length/2,-2.5,0.5]) rotate(180) linear_extrude(0.25) breadSheet();
+            translate([-length/2,-2.5,-1.75]) rotate(180) linear_extrude(2.25) butterSheet();
+            translate([-length/2,-2.5,-1.75]) rotate(180) linear_extrude(2.25) mirror([1,0]) butterSheet();
+            translate([-length/2,-2.5,-2]) rotate(180) linear_extrude(0.25) breadSheet();
+        }
     }
 }
 
 //butterSheet();
-renderSystem();
+renderSystem(true);
 //cuttingTable(true);
 //onionsHaveLayers();
