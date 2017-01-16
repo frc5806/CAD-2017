@@ -110,7 +110,7 @@ module tank_front_wall() {
 	length = f_length/2 + hood_ir + 1; // Gotta have some material at the top.
 	b_width = ball_channel_gap+ball_diameter;
 	b_length = ball_diameter + 0.25; // Gotta have a bit of space for the ball to pass through.
-	translate([0,0,length/2]) rotate([0,90]) translate([0,0,-tank_front_thickness/2]) 
+	color([1,1,1]) translate([0,0,length/2]) rotate([0,90]) translate([0,0,-tank_front_thickness/2]) 
 	linear_extrude(height=tank_front_thickness) difference() {
 		square([length,width],center=true);
 		translate([length/2-hood_ir,sh_wh_yt]) square([w_length,w_width],center=true);
@@ -126,7 +126,7 @@ module tank_front_wall() {
 }
 
 module tank_side_wall() {
-	linear_extrude(height=tank_wall_height) difference() {
+	color([.3,0.3,.3]) linear_extrude(height=tank_wall_height) difference() {
 		circle(required_feeder_rad+tank_wall_thickness, $fn=res);
 		circle(required_feeder_rad, $fn=res);
 		square([required_feeder_rad+tank_wall_thickness,required_feeder_rad+tank_wall_thickness]);
