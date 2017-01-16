@@ -178,4 +178,4 @@ module cuttingTable(split=false) {
     }
 }
 
-cuttingTable(true);
+cuttingTable(false);

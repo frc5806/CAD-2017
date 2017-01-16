@@ -24,9 +24,76 @@ flywheel_rad = 5;
 flywheel_thickness=0.5;
 
 hex_bearing_or = 1.125/2;
+flange_thickness = .062;
 
 cim_length = 4.34;
 cim_rad = 1.25;
+
+tank_wall_thickness = 0.25;
+
+feeder_center_rad = .75;
+feeder_spoke_length = 5.25;
+feeder_spoke_width = 0.5;
+required_feeder_rad = feeder_center_rad + feeder_spoke_length + 0.25; // +gap
+feeder_num_spokes = 4;
+feeder_thickness = 2;
+
+fuel_tank_base_width = flywheel_region_width + 2*(divider_width+tank_wall_thickness) + 4*required_feeder_rad;
+fuel_tank_length_extension = 4;
+fuel_tank_base_length = 2*required_feeder_rad+2*tank_wall_thickness;
+fuel_tank_base_thickness = hood_thickness;
+
+// 0=nothing, 1 = 2d dividers, 2 = 2d cim dividers, 3 = 3d
+rndr = 3;
+
+// Centered by default
+module rounded_rect(dimensions, rad) {
+	hull() {
+		translate([dimensions[0]/2-rad,dimensions[1]/2-rad]) circle(rad, $fn=res);
+		translate([dimensions[0]/2-rad,rad-dimensions[1]/2]) circle(rad, $fn=res);
+		translate([rad-dimensions[0]/2,dimensions[1]/2-rad]) circle(rad, $fn=res);
+		translate([rad-dimensions[0]/2,rad-dimensions[1]/2]) circle(rad, $fn=res);
+	}
+}
+
+module fuel_tank_base_plate() {
+	color([1,1,1]) linear_extrude(height=fuel_tank_base_thickness) difference() {
+		rounded_rect([fuel_tank_base_length,fuel_tank_base_width], required_feeder_rad);
+		translate([0,divider_width+required_feeder_rad+flywheel_region_width/2]) circle(hex_bearing_or, $fn=res);
+		translate([0,-(divider_width+required_feeder_rad+flywheel_region_width/2)]) circle(hex_bearing_or, $fn=res);
+	}
+}
+
+module feeder() {
+	color([0.5,0,0]) linear_extrude(height=feeder_thickness) union() {
+		circle(feeder_center_rad, $fn=res);
+		for(i=[1:feeder_num_spokes]) rotate([0,0,i*360/feeder_num_spokes])
+		translate([(feeder_center_rad+feeder_spoke_length)/2,0])
+		square([feeder_spoke_length+feeder_center_rad, feeder_spoke_width], center=true);
+	}
+}
+
+module feeder_inner_divider_2d() {
+	fuel_safety_dist = 0.5;
+	theta = atan(hood_ir/(fuel_tank_base_length+add_trans)) + asin((flywheel_rad+fuel_safety_dist)/sqrt(pow(fuel_tank_base_length+add_trans,2)+pow(hood_ir,2)));
+	polygon([[0,0],[-fuel_tank_base_length,0],[0,tan(theta)*fuel_tank_base_length]]);
+}
+module feeder_inner_divider() {
+	color([.75,.65,0.56]) rotate([90,0]) translate([0,0,-divider_width/2])
+	linear_extrude(height=divider_width) feeder_inner_divider_2d();
+}
+
+module fuel_tank_base() {
+	fuel_tank_base_plate();
+
+	translate([0,divider_width+required_feeder_rad+flywheel_region_width/2,fuel_tank_base_thickness]) feeder();
+	translate([0,-(divider_width+required_feeder_rad+flywheel_region_width/2),fuel_tank_base_thickness]) feeder();
+
+	translate([fuel_tank_base_length/2,-(divider_width+flywheel_region_width)/2,fuel_tank_base_thickness]) feeder_inner_divider();
+	translate([fuel_tank_base_length/2,(divider_width+flywheel_region_width)/2,fuel_tank_base_thickness]) feeder_inner_divider();
+}
+
+translate([-add_trans-fuel_tank_base_length/2,0]) fuel_tank_base();
 
 module hood() {
 	color([.3,0.3,.3]) union() {
@@ -146,14 +213,14 @@ module shooter() {
 
 	translate([0,0,hood_or]) flywheel();
 
-	translate([0,(hood_width+cim_length+.062)/2,hood_or]) cim_motor(); // flange thickness = .062
-	translate([0,-(hood_width+cim_length+.062)/2,hood_or]) cim_motor(); // flange thickness = .062
+	translate([0,(hood_width+cim_length+flange_thickness)/2,hood_or]) cim_motor();
+	translate([0,-(hood_width+cim_length+flange_thickness)/2,hood_or]) cim_motor();
     
     translate([0,0,hood_or]) axle();
 }
 
-// 1 = 2d dividers, 2 = 2d cim dividers, 3 = 3d
-rndr = 3;
+//*
+
 if(rndr == 1) {
 	layout_dividers_2d();
 }
@@ -163,3 +230,4 @@ else if(rndr == 2) {
 else if(rndr == 3) {
 	shooter();
 }
+//*/
