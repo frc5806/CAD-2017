@@ -170,9 +170,6 @@ module cuttingTable(split=false) {
     }
 }
 
-<<<<<<< HEAD
-cuttingTable(false);
-=======
 module renderSystem(split=false) {
     length=24;
 
@@ -201,4 +198,3 @@ module renderSystem(split=false) {
 renderSystem(true);
 //cuttingTable(true);
 //onionsHaveLayers();
->>>>>>> f250b1fc3e979666dbe25af6d2c3d9f42a4dddd4
