@@ -57,7 +57,7 @@ sh_cdiv_yt = (hood_width-cim_divider_width)/2;
 sh_c_yt = (hood_width+cim_length+flange_thickness)/2;
 
 // 0=nothing, 1 = 2d dividers, 2 = 2d cim dividers, 3 = 3d
-rndr = 3;
+rndr = 2;
 
 // Centered by default
 module rounded_rect(dimensions, rad) {
@@ -259,12 +259,12 @@ module axle() {
 // This one is not parametric for fairly obvious reasons :(
 // It does not fit on a single sheet, so I have it divided into two sheets to better use material.
 module layout_dividers_2d() {
-	translate([add_trans+.1, add_trans+.1]) mirror([-1,1]) divider_2d();
-	translate([hood_or+.8, hood_or+1.2]) rotate([0,0,-60]) divider_2d();
+	rotate(180)translate([add_trans-8.5, add_trans-8.5]) mirror([-1,1]) divider_2d();
+    mirror([-1,1]) translate([hood_or-3.5, hood_or+9.75]) rotate([0,0,0]) divider_2d();
 }
 module layout_cim_mount_dividers_2d() {
-	translate([add_trans+.1, add_trans+.1]) mirror([-1,1]) cim_mount_divider_2d();
-	translate([hood_or+.8, hood_or+1.2]) rotate([0,0,-60]) cim_mount_divider_2d();
+	rotate([0,0,160])translate([add_trans-5.75, add_trans-10.5]) mirror([-1,1]) cim_mount_divider_2d();mirror([-1,1])
+	translate([hood_or-3.7, hood_or+9.75]) rotate([0,0,26]) cim_mount_divider_2d();
 }
 module shooter() {
 
@@ -289,12 +289,19 @@ module shooter() {
 //*
 
 if(rndr == 1) {
-	layout_dividers_2d();
+    intersection() {
+        square([24,12]);
+        layout_dividers_2d();
+    }
 }
 else if(rndr == 2) {
-	layout_cim_mount_dividers_2d();
+    translate([-.125,0.5,0]) layout_cim_mount_dividers_2d();
 }
 else if(rndr == 3) {
 	shooter();
 }
+else if(rndr == 4){
+    layout_dividers_2d();
+    layout_cim_mount_dividers_2d();
+    }
 //*/
