@@ -18,6 +18,8 @@ flywheel_thickness=0.5;
 flywheel_region_width = 1.75;
 hood_width = 2*(ball_diameter+ball_channel_gap) + 2*divider_width + 2*cim_divider_width + flywheel_region_width;
 
+echo(hood_width);
+
 add_trans = 1.5;
 hood_length = hood_or + add_trans; //Ensures covers all.
 
@@ -57,7 +59,7 @@ sh_cdiv_yt = (hood_width-cim_divider_width)/2;
 sh_c_yt = (hood_width+cim_length+flange_thickness)/2;
 
 // 0=nothing, 1 = 2d dividers, 2 = 2d cim dividers, 3 = 3d
-rndr = 2;
+rndr = 3;
 
 // Centered by default
 module rounded_rect(dimensions, rad) {

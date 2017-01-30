@@ -195,6 +195,28 @@ module renderSystem(split=false) {
 }
 
 //butterSheet();
-renderSystem(true);
+//renderSystem(true);
 //cuttingTable(true);
 //onionsHaveLayers();
+
+module motorPlate() {
+    x = 0;
+    y = 0.5;
+    difference() {
+        hull() {
+            translate([x-0.5,-1-y]) square([1,1+y]);
+            circle(r=0.75);
+        }
+    
+        circle(r=0.25);
+        
+        translate([0.492,0]) circle(r=0.0788);
+        translate([-0.492,0]) circle(r=0.0788);
+        
+        translate([x,-y-0.25]) circle(r=.098);
+        translate([x,-y-0.75]) circle(r=.098);
+        
+    }
+}
+
+motorPlate();
