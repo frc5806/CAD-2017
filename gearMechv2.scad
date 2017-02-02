@@ -139,10 +139,16 @@ module frontSheet(split) {
 
 module backSheet() {
     filletRadius = 2;
+    
+    fudgeFactor = 2;
     difference() {
         union() {
+            hull() {
             circle(outerRadius);
             square([outerRadius,upperExtension]);
+            
+            translate([0,-9.5+fudgeFactor]) square([4.5,4]);
+            }
         }
         translate([0,upperExtension]) square([100,100]);
      
@@ -155,7 +161,7 @@ module backSheet() {
             }
             translate([0,h]) square([100,100]);
         }
-        translate([2.25,0.5]) igusBolts();
+        translate([2.25,-8+fudgeFactor]) igusBolts();
         translate([-100,-50]) square([100,100]);
     }
 }
@@ -172,13 +178,18 @@ module onionsHaveLayers(layers=18) {
 
 module cuttingTable(split=false) {
     mirror([-1,1,0]) {
-        translate([.125,12.25]) rotate(-90) { 
-            translate([6,6]) frontSheet();
-            translate([2.5,6]) backSheet();
+        translate([.125,12.25]) rotate(0) { 
+            //translate([6,6]) frontSheet();
+            translate([0.1,5.75]) backSheet();
+            translate([3.75,-3.5]) rotate(-30) backSheet();
+            
+            translate([2.5,-6.5]) rotate(60) motorPlate(0.8125,1.4375);
+            translate([1,-3]) motorPlate(0,7/8);
+
         }
-        translate([.125,22]) rotate(-90) { 
-            translate([6,6]) frontSheet();
-            translate([2.5,6]) backSheet();
+        translate([.125,22]) rotate(0) { 
+            //translate([6,6]) frontSheet();
+            //translate([6,-14.5]) backSheet();
         }
     }
 }
@@ -207,8 +218,30 @@ module renderSystem(split=false) {
     }
 }
 
+module motorPlate(x,y) {
+    difference() {
+        hull() {
+            translate([x-0.5,-1-y]) square([1,1+y]);
+            circle(r=0.75);
+        }
+    
+        circle(r=0.25);
+        
+        translate([0.492,0]) circle(r=0.0788);
+        translate([-0.492,0]) circle(r=0.0788);
+        
+        translate([x,-y-0.25]) circle(r=.098);
+        translate([x,-y-0.75]) circle(r=.098);
+        
+    }
+}
+
+
+
 //butterSheet(true);
 //breadSheet(true);
 //renderSystem(false);
-cuttingTable();
+//cuttingTable();
 //onionsHaveLayers();
+
+motorPlate(0.75,1.6875);

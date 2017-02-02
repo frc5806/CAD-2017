@@ -199,9 +199,7 @@ module renderSystem(split=false) {
 //cuttingTable(true);
 //onionsHaveLayers();
 
-module motorPlate() {
-    x = 0;
-    y = 0.5;
+module motorPlate(x,y) {
     difference() {
         hull() {
             translate([x-0.5,-1-y]) square([1,1+y]);
@@ -219,4 +217,5 @@ module motorPlate() {
     }
 }
 
-motorPlate();
+motorPlate(0.8125,1.4375);
+translate([2,0]) motorPlate(0,7/8);
