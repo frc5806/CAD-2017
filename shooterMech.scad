@@ -1,21 +1,21 @@
-res = 80;
+res = 120;
 
 ball_diameter = 5;
 
 wheel_or = 2;
 wheel_thickness = 1;
-compression = 0.125;
+compression = 0.3125;
 hood_ir = wheel_or - compression + ball_diameter; // Ball diameter
 hood_thickness = 0.0625; // Assuming steel for now
 hood_or = hood_ir + hood_thickness;
 
 ball_channel_gap = 0.125;
-divider_width = 0.25;
+divider_width = 0.125;
 cim_divider_width = 0.25;
 
 flywheel_rad = 5;
 flywheel_thickness=0.5;
-flywheel_region_width = 1.75;
+flywheel_region_width = 1.5;
 hood_width = 2*(ball_diameter+ball_channel_gap) + 2*divider_width + 2*cim_divider_width + flywheel_region_width;
 
 add_trans = 1.5;
@@ -110,9 +110,10 @@ module tank_front_wall() {
 	length = f_length/2 + hood_ir + 1; // Gotta have some material at the top.
 	b_width = ball_channel_gap+ball_diameter;
 	b_length = ball_diameter + 0.25; // Gotta have a bit of space for the ball to pass through.
+    bottom_extension = 1.05;
 	color([1,1,1]) translate([0,0,length/2]) rotate([0,90]) translate([0,0,-tank_front_thickness/2]) 
 	linear_extrude(height=tank_front_thickness) difference() {
-		square([length,width],center=true);
+		translate([bottom_extension/2,0]) square([length+bottom_extension,width],center=true);
 		translate([length/2-hood_ir,sh_wh_yt]) square([w_length,w_width],center=true);
 		translate([length/2-hood_ir,-sh_wh_yt]) square([w_length,w_width],center=true);
 		translate([length/2-hood_ir,0]) square([f_length,f_width],center=true);
@@ -241,8 +242,6 @@ module flywheel() {
 	color([0.6,0.6,.6]) rotate([90]) difference() {
 		union() {
 			cylinder(0.5, 5, 5, center=true, $fn=res);
-			cylinder(flywheel_thickness+0.43, 1.125, 1.125, center=true, $fn=res);
-			for(i=[1:6]) rotate([0,0,60*i]) translate([0.75,0]) cylinder(flywheel_thickness+0.8, 0.25/sqrt(3), 0.25/sqrt(3), center=true, $fn=6);
 		}
 		cylinder(3, 0.5/sqrt(3), 0.5/sqrt(3), center=true, $fn=6);
 	}
