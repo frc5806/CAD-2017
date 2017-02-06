@@ -84,7 +84,8 @@ module igusBolts() {
 
 innerRadius = 5.625;
 outerRadius = 6;
-upperExtension = outerRadius;
+upperExtension = outerRadius-.3325;
+frontUpperExtension = outerRadius/2;
 
 module boltU() {
     boltAngle = 20;
@@ -101,7 +102,7 @@ module boltU() {
     }
 }
 
-module butterSheet() {
+module sliverSheet() {
     difference() {
         union() {
             circle(outerRadius);
@@ -117,31 +118,51 @@ module butterSheet() {
     }   
 }
 
-module breadSheet(split) {
+module frontSheet(split) {
+    w = outerRadius - 2.375;
+    h = outerRadius - .875;
     filletRadius = 2;
     difference() {
         union() {
             circle(outerRadius);
-            
-            translate([innerRadius,0]) square([outerRadius-innerRadius,upperExtension]);
-            translate([-outerRadius,0]) square([outerRadius-innerRadius,upperExtension]);
+            square([outerRadius,frontUpperExtension]);
         }
-            
-        translate([-innerRadius,0]) square([innerRadius*2,20]);
+        translate([0,frontUpperExtension]) square([100,100]);
+     
         boltU();
-        
-        if (split) {
-            translate([-1.72-0.255906,3-innerRadius]) igusBolts();
-            translate([0,-50]) square([100,100]);
-        } else {
-            translate([0,3-innerRadius]) igusBolts();
+        translate([0,50]) square([w*2,100], center=true);
+        polygon([for(i=[1:360]) [w*cos(i),h*sin(i)]])
+        circle(w);
+        translate([-100,-50]) square([100,100]);
+    }
+}
+
+module backSheet() {
+    filletRadius = 2;
+    
+    fudgeFactor = 2;
+    difference() {
+        union() {
+            hull() {
+            circle(outerRadius);
+            square([outerRadius,upperExtension]);
+            
+            translate([0,-9.5+fudgeFactor]) square([4.5,4]);
+            }
         }
-    } difference() {
-        translate([-innerRadius,0]) square([filletRadius,filletRadius]);
-        translate([filletRadius-innerRadius,filletRadius]) circle(filletRadius);
-    } if (!split) difference() {
-        translate([innerRadius-filletRadius,0]) square([filletRadius,filletRadius]);
-        translate([innerRadius-filletRadius,filletRadius]) circle(filletRadius);
+        translate([0,upperExtension]) square([100,100]);
+     
+        boltU();
+        translate([-3,-4.375]) difference() {
+            w=4; h=2.875;
+            union() {
+                square([w,h]);
+                translate([w,h]) circle(h);
+            }
+            translate([0,h]) square([100,100]);
+        }
+        translate([2.25,-8+fudgeFactor]) igusBolts();
+        translate([-100,-50]) square([100,100]);
     }
 }
 
@@ -156,16 +177,19 @@ module onionsHaveLayers(layers=18) {
 }
 
 module cuttingTable(split=false) {
-    if (!split) {
-        translate([6,6]) breadSheet(split=split);
-        translate([6,15]) breadSheet(split=split);
-    } else {
-        translate([-2,5]) rotate(-45) { 
-            translate([6,6]) breadSheet(split=true);
-            translate([1,6.75]) rotate(180) breadSheet(split=true);
-        }         translate([-2,13.65]) rotate(-45) { 
-            translate([6,6]) breadSheet(split=true);
-            translate([1,7.5]) rotate(180) breadSheet(split=true);
+    mirror([-1,1,0]) {
+        translate([.125,12.25]) rotate(0) { 
+            //translate([6,6]) frontSheet();
+            translate([0.1,5.75]) backSheet();
+            translate([3.75,-3.5]) rotate(-30) backSheet();
+            
+            translate([2.5,-6.5]) rotate(60) motorPlate(0.8125,1.4375);
+            translate([1,-3]) motorPlate(0,7/8);
+
+        }
+        translate([.125,22]) rotate(0) { 
+            //translate([6,6]) frontSheet();
+            //translate([6,-14.5]) backSheet();
         }
     }
 }
@@ -179,25 +203,20 @@ module renderSystem(split=false) {
         color([0.5,0.5,0.5]) translate([-0.25,0,0.75+carriageHeight]) rotate([270,0,90]) igus(length);
         
         if (split) {
-            translate([1-length/2,-2.5,0.5]) rotate(180) linear_extrude(0.25) breadSheet(split=true);
-            translate([-1-length/2,-2.5,0.5]) rotate(180) linear_extrude(0.25) mirror([1,0]) breadSheet(split=true);
-            translate([1-length/2,-2.5,-1.75]) rotate(180) linear_extrude(2.25) butterSheet();
-            translate([-1-length/2,-2.5,-1.75]) rotate(180) linear_extrude(2.25) mirror([1,0]) butterSheet();
-            translate([1-length/2,-2.5,-2]) rotate(180) linear_extrude(0.25) breadSheet(split=true);
-            translate([-1-length/2,-2.5,-2]) rotate(180) linear_extrude(0.25) mirror([1,0]) breadSheet(split=true);
+            translate([1-length/2,-2.5,0.5]) rotate(180) linear_extrude(0.25) frontSheet(split=true);
+            translate([-1-length/2,-2.5,0.5]) rotate(180) linear_extrude(0.25) mirror([1,0]) frontSheet(split=true);
+            translate([1-length/2,-2.5,-1.75]) rotate(180) linear_extrude(2.25) sliverSheet();
+            translate([-1-length/2,-2.5,-1.75]) rotate(180) linear_extrude(2.25) mirror([1,0]) sliverSheet();
+            translate([1-length/2,-2.5,-2]) rotate(180) linear_extrude(0.25) frontSheet(split=true);
+            translate([-1-length/2,-2.5,-2]) rotate(180) linear_extrude(0.25) mirror([1,0]) frontSheet(split=true);
         } else {
-            translate([-length/2,-2.5,0.5]) rotate(180) linear_extrude(0.25) breadSheet();
-            translate([-length/2,-2.5,-1.75]) rotate(180) linear_extrude(2.25) butterSheet();
-            translate([-length/2,-2.5,-1.75]) rotate(180) linear_extrude(2.25) mirror([1,0]) butterSheet();
-            translate([-length/2,-2.5,-2]) rotate(180) linear_extrude(0.25) breadSheet();
+            translate([-length/2,-2.5,0.5]) rotate(180) linear_extrude(0.25) sliverSheet();
+            translate([-length/2,-2.5,-1.75]) rotate(180) linear_extrude(2.25) sliverSheet();
+            translate([-length/2,-2.5,-1.75]) rotate(180) linear_extrude(2.25) mirror([1,0]) frontSheet();
+            translate([-length/2,-2.5,-2]) rotate(180) linear_extrude(0.25) frontSheet();
         }
     }
 }
-
-//butterSheet();
-//renderSystem(true);
-//cuttingTable(true);
-//onionsHaveLayers();
 
 module motorPlate(x,y) {
     difference() {
@@ -217,5 +236,12 @@ module motorPlate(x,y) {
     }
 }
 
-motorPlate(0.8125,1.4375);
-translate([2,0]) motorPlate(0,7/8);
+
+
+//butterSheet(true);
+//breadSheet(true);
+//renderSystem(false);
+//cuttingTable();
+//onionsHaveLayers();
+
+motorPlate(0.75,1.6875);
