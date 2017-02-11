@@ -1,4 +1,4 @@
-res = 1000;
+res = 120;
 
 ball_diameter = 5;
 
@@ -6,17 +6,19 @@ wheel_or = 2;
 wheel_thickness = 1;
 compression = 0.3125;
 hood_ir = wheel_or - compression + ball_diameter; // Ball diameter
+echo("Hood IR", hood_ir);
 hood_thickness = 0.125;
 hood_or = hood_ir + hood_thickness;
 
 ball_channel_gap = 0.125;
 divider_width = 0.125;
-cim_divider_width = 0.25;
+cim_divider_width = .125;
 
 flywheel_rad = 5;
 flywheel_thickness=0.5;
-flywheel_region_width = 1.5;
+flywheel_region_width = 1.75;
 hood_width = 2*(ball_diameter+ball_channel_gap) + 2*divider_width + 2*cim_divider_width + flywheel_region_width;
+echo("Hood width", hood_width);
 
 add_trans = 1.5;
 hood_length = hood_or + add_trans; //Ensures covers all.
@@ -27,7 +29,7 @@ hex_bearing_or = 1.12/2;
 flange_thickness = .062;
 
 feeder_center_rad = .75;
-feeder_spoke_length = 5.25;
+feeder_spoke_length = 5.125;
 feeder_spoke_width = 0.5;
 required_feeder_rad = feeder_center_rad + feeder_spoke_length + 0.25; // +gap
 feeder_num_spokes = 4;
@@ -111,21 +113,39 @@ tfw_width = fuel_tank_base_width-2*(tank_wall_thickness+required_feeder_rad);
 tfw_length = tfw_f_length/2 + hood_ir + 1; // Gotta have some material at the top.
 tfw_b_width = ball_channel_gap+ball_diameter;
 tfw_b_length = ball_diameter + 0.25; // Gotta have a bit of space for the ball to pass through.
-tfw_bottom_extension = 1.05;
+tfw_bottom_extension = 1;
 module tank_front_wall_2d() {
+    hole_rad = 3/16;
+    hole_dist = 1/2;
 	difference() {
+        // Main piece.
 		translate([tfw_bottom_extension/2,0]) square([tfw_length+tfw_bottom_extension,tfw_width],center=true);
+        // Wheel openings
 		translate([tfw_length/2-hood_ir,sh_wh_yt]) square([tfw_w_length,tfw_w_width],center=true);
 		translate([tfw_length/2-hood_ir,-sh_wh_yt]) square([tfw_w_length,tfw_w_width],center=true);
+        // Flywheel opening
 		translate([tfw_length/2-hood_ir,0]) square([tfw_f_length,tfw_f_width],center=true);
+        // Ball channel openings
 		translate([tfw_length/2-tfw_b_length/2,sh_wh_yt]) square([tfw_b_length,tfw_b_width],center=true);
 		translate([tfw_length/2-tfw_b_length/2,-sh_wh_yt]) square([tfw_b_length,tfw_b_width],center=true);
-		translate([tfw_length/2-feeder_thickness-feeder_bottom_gap-versa_holder_thick/2,sh_cdiv_yt-divider_width/2]) square([versa_holder_thick,divider_width],center=true);
-		translate([tfw_length/2-feeder_thickness-feeder_bottom_gap-versa_holder_thick/2,-sh_cdiv_yt+divider_width/2]) square([versa_holder_thick,divider_width],center=true);
+        // Cim divider slots.
+		translate([tfw_length/2-feeder_thickness-feeder_bottom_gap-versa_holder_thick/2,sh_cdiv_yt]) square([versa_holder_thick,divider_width],center=true);
+		translate([tfw_length/2-feeder_thickness-feeder_bottom_gap-versa_holder_thick/2,-sh_cdiv_yt]) square([versa_holder_thick,divider_width],center=true);
+        // Inner divider slots.
 		translate([tfw_length/2-tank_wall_height/2,sh_div_yt]) square([tank_wall_height,divider_width],center=true);
 		translate([tfw_length/2-tank_wall_height/2,-sh_div_yt]) square([tank_wall_height,divider_width],center=true);
+        // Bottom holes.
+        translate([tfw_length/2+tfw_bottom_extension-hole_dist,0]) circle(hole_rad, $fn=res);
+        translate([tfw_length/2+tfw_bottom_extension-hole_dist,-tfw_width/2+hole_dist]) circle(hole_rad, $fn=res);
+        translate([tfw_length/2+tfw_bottom_extension-hole_dist,tfw_width/2-hole_dist]) circle(hole_rad, $fn=res);
+        // Additional weight-saving cutouts.
+        ws_width = tfw_width/2-flywheel_region_width/2-divider_width-(tfw_width/2-sh_cdiv_yt+cim_divider_width/2);
+        ws_length = tfw_length-hood_ir-tfw_w_length/2-0.75;
+        translate([-tfw_length/2,-sh_cdiv_yt+cim_divider_width/2]) square([ws_length,ws_width]);
+        translate([-tfw_length/2,tfw_width/2-ws_width]) square([ws_length,ws_width]);
 	}
 }
+//tank_front_wall_2d();
 module tank_front_wall() {
     color([1,1,1]) translate([0,0,tfw_length/2]) rotate([0,90]) translate([0,0,-tank_front_thickness/2]) 
 	linear_extrude(height=tank_front_thickness) tank_front_wall_2d();
@@ -152,22 +172,19 @@ module fuel_tank() {
 	translate([0,-(required_feeder_rad+tank_wall_thickness-fuel_tank_base_width/2),fuel_tank_base_thickness]) mirror([0,1]) tank_side_wall();
 }
 
-
+module hood_2d() {
+    intersection() {
+        difference() {
+            circle(hood_or, $fn=res);
+            circle(hood_ir, $fn=res);
+        }
+        rotate([0,0,90-hood_angle]) square([hood_or, hood_or]);
+        square([hood_or, hood_or]);
+    }
+    translate([-add_trans,hood_ir]) square([add_trans,hood_thickness]);
+}
 module hood() {
-	color([.3,0.3,.3]) union() {
-	    translate([0,-hood_width/2,hood_or]) rotate([-90])
-	    linear_extrude(height = hood_width) intersection() {
-	        difference() {
-	            circle(hood_or, $fn=res);
-	            circle(hood_ir, $fn=res);
-	        }
-	        rotate([0,0,90-hood_angle]) square([hood_or, hood_or]);
-	        square([hood_or, hood_or]);
-	    }
-		translate([(-add_trans)/2,0])
-		linear_extrude(height=hood_thickness)
-		square([add_trans,hood_width],center=true);
-	}
+	color([.3,0.3,.3]) translate([0,-hood_width/2,hood_or]) rotate([-90]) linear_extrude(height=hood_width) hood_2d();
 }
 
 module divider_2d() {
@@ -215,13 +232,14 @@ module cim_mount_divider_2d() {
 					[0, -add_trans]]);
 			}
 			translate([0,hood_or-hood_length]) square([hood_ir, add_trans]);
-			translate([versa_z_trans-versa_thick/2,-(add_trans+required_feeder_rad+tank_wall_thickness)/2])
+            ext_length = required_feeder_rad+tank_wall_thickness+versa_length/2;
+			translate([versa_z_trans-versa_thick/2,-add_trans-ext_length/2])
 			difference() {
-				translate([(versa_thick-versa_holder_thick)/2,0]) square([versa_holder_thick,add_trans+required_feeder_rad+tank_wall_thickness+versa_length], center=true);
-				translate([versa_bolt_t/2,-versa_bolt_l/2-(add_trans+required_feeder_rad+tank_wall_thickness)/2]) circle(versa_bolt_rad, $fn=res);
-				translate([-versa_bolt_t/2,-versa_bolt_l/2-(add_trans+required_feeder_rad+tank_wall_thickness)/2]) circle(versa_bolt_rad, $fn=res);
-				translate([versa_bolt_t/2,versa_bolt_l/2-(add_trans+required_feeder_rad+tank_wall_thickness)/2]) circle(versa_bolt_rad, $fn=res);
-				translate([-versa_bolt_t/2,versa_bolt_l/2-(add_trans+required_feeder_rad+tank_wall_thickness)/2]) circle(versa_bolt_rad, $fn=res);
+				translate([(versa_thick-versa_holder_thick)/2,0]) square([versa_holder_thick,ext_length], center=true);
+				translate([versa_bolt_t/2,(versa_length-versa_bolt_l-ext_length)/2]) circle(versa_bolt_rad, $fn=res);
+				translate([-versa_bolt_t/2,(versa_length+versa_bolt_l-ext_length)/2]) circle(versa_bolt_rad, $fn=res);
+				translate([versa_bolt_t/2,(versa_length+versa_bolt_l-ext_length)/2]) circle(versa_bolt_rad, $fn=res);
+				translate([-versa_bolt_t/2,(versa_length-versa_bolt_l-ext_length)/2]) circle(versa_bolt_rad, $fn=res);
 			}
 		}
 		circle(hex_bearing_or, $fn=res);
@@ -260,15 +278,18 @@ module axle() {
 // This one is not parametric for fairly obvious reasons :(
 // It does not fit on a single sheet, so I have it divided into two sheets to better use material.
 module layout_dividers_2d() {
-	rotate(180)translate([add_trans-8.5, add_trans-8.5]) mirror([-1,1]) divider_2d();
-    mirror([-1,1]) translate([hood_or-3.5, hood_or+9.75]) rotate([0,0,0]) divider_2d();
+	rotate(180) translate([add_trans-8.5, add_trans-8.5]) mirror([-1,1]) divider_2d();
+    mirror([-1,1]) translate([hood_or-2.8, hood_or+9.95]) rotate([0,0,0]) divider_2d();
 }
 module layout_cim_mount_dividers_2d() {
-	rotate([0,0,160])translate([add_trans-5.75, add_trans-10.5]) mirror([-1,1]) cim_mount_divider_2d();mirror([-1,1])
-	translate([hood_or-3.7, hood_or+9.75]) rotate([0,0,26]) cim_mount_divider_2d();
+    gap = 0.125;
+    theta = 100;
+    translate([11.6,4.4]) rotate([0,0,theta]) union() {
+        translate([tank_wall_height+gap/2-hood_ir,add_trans+(required_feeder_rad+tank_wall_thickness)/2]) cim_mount_divider_2d();
+        rotate([0,0,180]) translate([tank_wall_height+gap/2-hood_ir,add_trans+gap+(required_feeder_rad+tank_wall_thickness+versa_length)/2]) cim_mount_divider_2d();
+    }
 }
 module shooter() {
-
 	hood();
 
 	translate([0,sh_wh_yt,hood_or]) wheel();
@@ -286,17 +307,21 @@ module shooter() {
     
     translate([0,0,hood_or]) axle();
 }
-
+function flatten(l) = [for(a=l) for(b=a) b] ;
+function cat(l1, l2) = [for(i=[0:len(l1)+len(l2)-1]) i<len(l1)?l1[i]:l2[i-len(l1)]];
+module zig_zag(l, n, d, b) {
+    poly1 = flatten([for(i=[0:2*l/n-1]) [[-l+i*n,i%2==0?-d/2:d/2],[-l+(i+1)*n,i%2==0?-d/2:d/2]]]);
+    poly2 = b?[[l,100],[-l,100]]:[[l,-100],[-l,-100]];
+    poly = cat(poly1,poly2);
+    polygon(poly);
+}
 //*
-rndr = 5;
+rndr = 3;//9;
 if(rndr == 1) {
-    intersection() {
-        square([24,12]);
-        layout_dividers_2d();
-    }
+    layout_dividers_2d();
 }
 else if(rndr == 2) {
-    translate([-.125,0.5,0]) layout_cim_mount_dividers_2d();
+    layout_cim_mount_dividers_2d();
 }
 else if(rndr == 3) {
 	shooter();
@@ -314,6 +339,30 @@ else if(rndr == 5) {
         translate([15.5,7.6]) rotate([0,0,180]) divider_2d();
         translate([7,31.2]) tank_front_wall_2d();
     }
-    //color([0,0,0]) translate([0,0,-1]) cube([39,19.5,.1]);
+}
+else if(rndr == 6) {
+    intersection() {
+        tank_front_wall_2d();
+        zig_zag(20,.41,.41,true); 
+    }
+}
+else if(rndr == 7) {
+    intersection() {
+        tank_front_wall_2d();
+        zig_zag(20,.41,.41,false);
+    }
+}
+else if(rndr == 8) {
+    translate([add_trans,0]) hood_2d();
+}
+else if(rndr == 9) {
+	hood();
+
+	translate([0,sh_div_yt,hood_thickness]) divider();
+	translate([0,-sh_div_yt,hood_thickness]) divider();
+	translate([0,sh_cdiv_yt,hood_thickness]) cim_mount_divider();
+	translate([0,-sh_cdiv_yt,hood_thickness]) cim_mount_divider();
+    
+    translate([-tank_front_thickness/2-add_trans,0,fuel_tank_base_thickness]) tank_front_wall();
 }
 //*/
