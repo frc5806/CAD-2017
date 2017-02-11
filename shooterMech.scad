@@ -10,7 +10,7 @@ echo("Hood IR", hood_ir);
 hood_thickness = 0.125;
 hood_or = hood_ir + hood_thickness;
 
-ball_channel_gap = 1/16;
+ball_channel_gap = 1/8;
 divider_width = 0.125;
 cim_divider_width = .125;
 
@@ -308,7 +308,7 @@ module zig_zag(l, n, d, b) {
     polygon(poly);
 }
 //*
-rndr = 9;
+rndr = 5;
 if(rndr == 1) {
     layout_dividers_2d();
 }
@@ -324,12 +324,15 @@ else if(rndr == 4){
     layout_cim_mount_dividers_2d();
 }
 else if(rndr == 5) {
-    mirror([-1,1]) {
-        translate([3.6,17.2]) cim_mount_divider_2d();
-        translate([6.8,6.8]) rotate([0,0,180]) cim_mount_divider_2d();
-        translate([17.3,17.2]) divider_2d();
-        translate([17.3,7.6]) rotate([0,0,180]) divider_2d();
-        translate([7,31.2]) tank_front_wall_2d();
+    intersection() {
+            mirror([-1,1]) {
+            translate([3.6,17.2]) cim_mount_divider_2d();
+            translate([6.8,6.8]) rotate([0,0,180]) cim_mount_divider_2d();
+            translate([17.2,17.2]) divider_2d();
+            translate([17.2,7.6]) rotate([0,0,180]) divider_2d();
+            translate([7,31.2]) tank_front_wall_2d();
+        }
+        square([40,23.9]);
     }
 }
 else if(rndr == 6) {
