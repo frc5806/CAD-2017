@@ -1,4 +1,4 @@
-res = 120;
+res = 240;
 
 ball_diameter = 5;
 
@@ -10,7 +10,7 @@ echo("Hood IR", hood_ir);
 hood_thickness = 0.125;
 hood_or = hood_ir + hood_thickness;
 
-ball_channel_gap = 0.125;
+ball_channel_gap = 1/16;
 divider_width = 0.125;
 cim_divider_width = .125;
 
@@ -105,15 +105,15 @@ module tank_wall() {
 
 tfw_rlvnt_flywheel_rad = flywheel_rad + 0.25; //Safety gap.
 tfw_f_width = flywheel_thickness + 0.25;
-tfw_f_length = 2*tfw_rlvnt_flywheel_rad*sin(acos((tank_front_thickness+add_trans)/tfw_rlvnt_flywheel_rad));
+tfw_f_length = 2*flywheel_rad+0.125;
 tfw_rlvnt_wheel_rad = wheel_or + 0.75; // Safety gap.
 tfw_w_width = wheel_thickness + 0.25; // Safety gap.
 tfw_w_length = 2*tfw_rlvnt_wheel_rad*sin(acos(add_trans/tfw_rlvnt_wheel_rad));
 tfw_width = fuel_tank_base_width-2*(tank_wall_thickness+required_feeder_rad);
-tfw_length = tfw_f_length/2 + hood_ir + 1; // Gotta have some material at the top.
+tfw_length = 2*hood_ir;
 tfw_b_width = ball_channel_gap+ball_diameter;
 tfw_b_length = ball_diameter + 0.25; // Gotta have a bit of space for the ball to pass through.
-tfw_bottom_extension = 1;
+tfw_bottom_extension = 1+hood_thickness;
 module tank_front_wall_2d() {
     hole_rad = 3/16;
     hole_dist = 1/2;
@@ -139,9 +139,9 @@ module tank_front_wall_2d() {
         translate([tfw_length/2+tfw_bottom_extension-hole_dist,-tfw_width/2+hole_dist]) circle(hole_rad, $fn=res);
         translate([tfw_length/2+tfw_bottom_extension-hole_dist,tfw_width/2-hole_dist]) circle(hole_rad, $fn=res);
         // Additional weight-saving cutouts.
-        ws_width = tfw_width/2-flywheel_region_width/2-divider_width-(tfw_width/2-sh_cdiv_yt+cim_divider_width/2);
+        ws_width = tfw_width/2-flywheel_region_width/2-divider_width;
         ws_length = tfw_length-hood_ir-tfw_w_length/2-0.75;
-        translate([-tfw_length/2,-sh_cdiv_yt+cim_divider_width/2]) square([ws_length,ws_width]);
+        translate([-tfw_length/2,-tfw_width/2]) square([ws_length,ws_width]);
         translate([-tfw_length/2,tfw_width/2-ws_width]) square([ws_length,ws_width]);
 	}
 }
@@ -190,19 +190,11 @@ module hood() {
 module divider_2d() {
 	difference() {
 		union() {
-			union() {
-				intersection() {
-					circle(hood_ir, $fn=res);
-					square([hood_ir, hood_ir]);
-					rotate([0,0,hood_angle-90]) square([hood_ir, hood_ir]);
-				}
-				theta = 90-acos(add_trans/hood_ir);
-				polygon([[0,0],
-					[cos(hood_angle)*hood_ir,sin(hood_angle)*hood_ir],
-					[-(add_trans+sin(hood_angle)*hood_ir)*tan(theta), -add_trans],
-					[0, -add_trans]]);
-			}
-			translate([0,hood_or-hood_length]) square([hood_ir, add_trans]);
+			intersection() {
+                circle(hood_ir, $fn=res);
+                translate([-hood_ir,0]) square([2*hood_ir, hood_ir]);
+            }
+			translate([-hood_ir,hood_or-hood_length]) square([2*hood_ir, add_trans]);
 			translate([hood_ir-tank_wall_height,-fuel_tank_base_length/2-add_trans]) square([tank_wall_height, fuel_tank_base_length/2]);
 		}
 		circle(hex_bearing_or, $fn=res);
@@ -316,7 +308,7 @@ module zig_zag(l, n, d, b) {
     polygon(poly);
 }
 //*
-rndr = 3;//9;
+rndr = 9;
 if(rndr == 1) {
     layout_dividers_2d();
 }
@@ -335,8 +327,8 @@ else if(rndr == 5) {
     mirror([-1,1]) {
         translate([3.6,17.2]) cim_mount_divider_2d();
         translate([6.8,6.8]) rotate([0,0,180]) cim_mount_divider_2d();
-        translate([12.3,17.2]) divider_2d();
-        translate([15.5,7.6]) rotate([0,0,180]) divider_2d();
+        translate([17.3,17.2]) divider_2d();
+        translate([17.3,7.6]) rotate([0,0,180]) divider_2d();
         translate([7,31.2]) tank_front_wall_2d();
     }
 }
