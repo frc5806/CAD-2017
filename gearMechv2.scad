@@ -218,17 +218,25 @@ module renderSystem(split=false) {
     }
 }
 
-module motorPlate(x,y) {
+module motorPlate(x,y,rot) {
     difference() {
         hull() {
             translate([x-0.5,-1-y]) square([1,1+y]);
             circle(r=0.75);
+            rotate(rot) translate([1.5,0]) circle(r=0.75);
         }
     
-        circle(r=0.25);
+        circle(r=0.325);
         
-        translate([0.492,0]) circle(r=0.0788);
-        translate([-0.492,0]) circle(r=0.0788);
+        rotate(rot) {
+            translate([0,0.492]) circle(r=0.0788);
+            translate([0,-0.492]) circle(r=0.0788);
+        }
+        
+        rotate(rot) for (i=[-0.25:0.5:0.25]) { hull() {
+            translate([0.75,i]) circle(r=0.07);
+            translate([2,i]) circle(r=0.07);
+        }}
         
         translate([x,-y-0.25]) circle(r=.098);
         translate([x,-y-0.75]) circle(r=.098);
@@ -244,4 +252,5 @@ module motorPlate(x,y) {
 //cuttingTable();
 //onionsHaveLayers();
 
-motorPlate(0.75,1.6875);
+//motorPlate(0.75+(3/16),1.6875-(1/4)-(1/16),0);
+motorPlate(0,5/16,90);
