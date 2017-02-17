@@ -4,7 +4,7 @@ bagBoltCircleRad = 0.984/2;
 bagBoltRad = 0.0787;
 bagBoltHeadRad = 0.18;
 
-fitFactor = 0.02;
+fitFactor = 0.01;
 
 nutDiag = (9/16)/sqrt(3);
 

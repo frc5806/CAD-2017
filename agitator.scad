@@ -23,19 +23,22 @@ module flankCutout(offset) {
     }
 }
 
+module agitator(spokes=4) {
+    difference() {
+        for (i=[0:(360/spokes):360]) {
+            rotate(i) hull() {
+                cylinder(r=0.4,h=1.75);
+                flankStructure(0.5); 
+            }
+        }
+        
+        cylinder(h=1.5+(1/16),r=0.28865,$fn=6);
+        cylinder(r=0.125,h=10);
 
-difference() {
-    for (i=[0:90:270]) {
-        rotate(i) hull() {
-            cylinder(r=0.4,h=1.75);
-            flankStructure(0.5); 
+        for (i=[0:(360/spokes):360]) {
+            rotate(i) flankCutout(0.5);
         }
     }
-    
-    cylinder(h=1.5+(1/16),r=0.28865,$fn=6);
-    cylinder(r=0.125,h=10);
-
-    for (i=[0:90:270]) {
-        rotate(i) flankCutout(0.5);
-    }
 }
+
+agitator(3);
