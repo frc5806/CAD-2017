@@ -61,7 +61,7 @@ sh_cdiv_yt = (hood_width-cim_divider_width)/2;
 sh_c_yt = (hood_width+cim_length+flange_thickness)/2;
 
 // 0=nothing, 1 = 2d dividers, 2 = 2d cim dividers, 3 = 3d
-rndr = 3;
+rndr = 0;
 
 // Centered by default
 module rounded_rect(dimensions, rad) {
@@ -308,7 +308,7 @@ module zig_zag(l, n, d, b) {
     polygon(poly);
 }
 //*
-rndr = 5;
+rndr = 3;
 if(rndr == 1) {
     layout_dividers_2d();
 }
