@@ -4,6 +4,7 @@ hood_ir = 2 - 0.3125 + 5;
 hood_thickness = 0.125;
 hood_or = hood_ir + hood_thickness;
 
+
 plateWidth = 1.5;
 add_trans = 1.5;
 
@@ -47,6 +48,8 @@ difference() {
 union() {
 
 cutoutThickness = 1/128;
+
+    
 difference() {
     translate([-hood_ir,0])circle(r=hood_or+0.125 + cutoutThickness/2);
     translate([-hood_ir,0])circle(r=hood_or+0.125 - cutoutThickness/2);
@@ -58,4 +61,7 @@ difference() {
 }
 
 }
- 
+
+// angle = 64 deg = 1.11701
+// rad = 6.8125
+// arclength = 7.61 = 7 and 19/32nds
